@@ -1,2 +1,2 @@
 # bbgw-lab
-Beaglebone Green Wireless Lab
+Beaglebone Lab
