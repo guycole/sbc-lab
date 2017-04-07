@@ -19,8 +19,19 @@
 using namespace std;
 
 LedLight::LedLight(int gpio) {
-  lit_flag = false;
-  gpio_filename = "/sys/class/gpio/gpio" + to_string(gpio) + "/value";
+  string dir_name = "/sys/class/gpio/gpio" + to_string(gpio);
+  gpio_filename = dir_name + "/value";
+
+  if (ifstream(dir_name)) {
+    ofstream outfile;
+    outfile.open(dir_name + "/direction");
+    outfile << "out" << endl;
+    outfile.close();
+
+    lightFlag(false);
+  } else {
+    throw;
+  }
 }
 
 void LedLight::lightFlag(bool flag) {
