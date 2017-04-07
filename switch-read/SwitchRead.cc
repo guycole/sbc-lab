@@ -1,9 +1,9 @@
 //
 // Title:
-//   LedLight.cc
+//   SwitchRead.cc
 //
 // Description:
-//   Control a LED via GPIO port
+//   Read a push button switch via GPIO port
 //
 // Development Environment:
 //   bone-debian-8.7-iot-armhf-2017-03-19-4gb.img
@@ -14,39 +14,41 @@
 #include <iostream>
 #include <string>
 
-#include "LedLight.h"
+#include "SwitchRead.h"
 
 using namespace std;
 
-LedLight::LedLight(int gpio) {
+SwitchRead::SwitchRead(int gpio) {
   string dirName = "/sys/class/gpio/gpio" + to_string(gpio);
   gpioFileName = dirName + "/value";
 
   if (ifstream(dirName)) {
     ofstream outfile1(dirName + "/direction");
-    outfile1 << "out" << endl;
+    outfile1 << "in" << endl;
     outfile1.close();
 
     ofstream outfile2(dirName + "/active_low");
     outfile2 << "0" << endl;
     outfile2.close();
 
-    lightFlag(false);
+    gpioRead();
   } else {
     throw;
   }
 }
 
-void LedLight::lightFlag(bool flag) {
-  ofstream outfile(gpioFileName);
+bool SwitchRead::gpioRead() {
+  char buffer[2];
 
-  if (flag) {
-    litFlag = true;
-    outfile << "1" << endl;
+  ifstream infile(gpioFileName);
+  infile >> buffer;
+  infile.close();
+
+  if (buffer[0] < 0x31) { // ascii 1
+    gpioFlag = false;
   } else {
-    litFlag = false;
-    outfile << "0" << endl;
+    gpioFlag = true;
   }
 
-  outfile.close();
+  return gpioFlag;
 }

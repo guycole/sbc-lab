@@ -1,9 +1,9 @@
 //
 // Title:
-//   LedLight.h
+//   SwitchRead.h
 //
 // Description:
-//   Control a LED via GPIO port
+//   Read a push button switch via GPIO port
 //
 // Development Environment:
 //   bone-debian-8.7-iot-armhf-2017-03-19-4gb.img
@@ -14,17 +14,17 @@
 
 using namespace std;
 
-#ifndef _LED_LIGHT_H_
-#define _LED_LIGHT_H_
+#ifndef _SWITCH_READ_H_
+#define _SWTICH_READ_H_
 
-class LedLight {
+class SwitchRead {
 private:
-  bool litFlag;
+  bool gpioFlag;
   string gpioFileName;
 public:
-  LedLight(int gpio);
-  void lightFlag(bool flag);
-  bool isLit(){return litFlag;}
+  SwitchRead(int gpio);
+  bool gpioRead();
+  bool isPressed(){return gpioFlag;}
 };
 
 #endif
