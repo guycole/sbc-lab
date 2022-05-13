@@ -1,2 +1,2 @@
-# bbgw-lab
-Beaglebone Lab
+# bb-lab
+Experiments w/Beaglebone 
