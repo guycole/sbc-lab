@@ -9,17 +9,28 @@
  */
 #include <stdio.h>
 
-#include "beaglebone.h"
+#include "bb_gpio.h"
 
-int main(int argc, char *argv[]) {
-	GPIO gpio;
+int main(int argc, char *argv[])
+{
+  GPIO gpio;
 
-	printf("start\n");
+  printf("start\n");
 
-	gpio_factory(666, &gpio);
+  gpio_dump(&gpio);
 
-	printf("%s\n", gpio.name);
-	printf("%s\n", gpio.path);
+  gpio_factory(60, &gpio);
+  gpio_dump(&gpio);
 
-	printf("stop\n");
+  printf("-x-x-x-x-x-x-\n");
+
+  gpio_set_direction(DIR_IN, &gpio);
+  gpio_dump(&gpio);
+
+  gpio_set_value(VALUE_LOW, &gpio);
+  gpio_dump(&gpio);
+
+  gpio_free(&gpio);
+
+  printf("stop\n");
 }
