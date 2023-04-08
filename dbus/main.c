@@ -9,3 +9,10 @@
 ** Author:
 **   G.S. Cole (guycole at gmail dot com)
 */
+
+#include <stdio.h>
+
+int main(int argc, char *argv[]) {
+    printf("begin\n");
+    printf("end\n");
+}
