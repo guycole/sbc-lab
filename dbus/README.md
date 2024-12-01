@@ -1,2 +1,0 @@
-# dbus
-Demonstrate D-BUS 
