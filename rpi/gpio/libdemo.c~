@@ -1,0 +1,124 @@
+#include <errno.h>
+#include <gpiod.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct flag {
+	const char *name;
+	is_set func is_set;
+};
+
+static const struct flag flags[] = {
+	{
+		.name = "used",
+		.is_set = gpiod_line_is_used,
+	},
+};
+
+static void list_lines(struct gpiod_chip *chip)
+{
+	struct gpiod_line_iter *iter;
+	int direction, active_state;
+	const char *name, *consumer;
+	struct gpiod_line *line;
+	unsigned int i, offset;
+	bool flag_printed, of;
+
+	iter = gpiod_line_iter_new(chip);
+	if (!iter)
+		printf("error creating line iterator");
+
+	printf("%s - %u lines:\n",
+	       gpiod_chip_name(chip), gpiod_chip_num_lines(chip));
+
+	gpiod_foreach_line(iter, line) {
+		offset = gpiod_line_offset(line);
+		name = gpiod_line_name(line);
+		consumer = gpiod_line_consumer(line);
+		direction = gpiod_line_direction(line);
+		active_state = gpiod_line_active_state(line);
+
+		of = false;
+
+		printf("\tline ");
+		printf(&of, 3, "%u", offset);
+		printf(": ");
+
+		name ? printf(&of, 12, "\"%s\"", name)
+		     : printf(&of, 12, "unnamed");
+		printf(" ");
+
+		if (!gpiod_line_is_used(line))
+			printf(&of, 12, "unused");
+		else
+			consumer ? printf(&of, 12, "\"%s\"", consumer)
+				 : printf(&of, 12, "kernel");
+
+		printf(" ");
+
+		printf(&of, 8, "%s ", direction == GPIOD_LINE_DIRECTION_INPUT
+							? "input" : "output");
+		printf(&of, 13, "%s ",
+		       active_state == GPIOD_LINE_ACTIVE_STATE_LOW
+							? "active-low"
+							: "active-high");
+
+		flag_printed = false;
+		for (i = 0; i < ARRAY_SIZE(flags); i++) {
+			if (flags[i].is_set(line)) {
+				if (flag_printed)
+					printf(" ");
+				else
+					printf("[");
+				printf("%s", flags[i].name);
+				flag_printed = true;
+			}
+		}
+		if (flag_printed)
+			printf("]");
+
+		printf("\n");
+	}
+
+	gpiod_line_iter_free(iter);
+}
+
+int main(void)
+{
+	printf("start\n");
+	printf("%s\n", gpiod_version_string());
+
+	/* Example configuration - customize to suit your situation. */
+	static const char *const chip_path = "/dev/gpiochip0";
+
+	struct gpiod_chip_info *info;
+	struct gpiod_chip *chip;
+
+	chip = gpiod_chip_open(chip_path);
+	if (!chip) {
+		fprintf(stderr, "failed to open chip: %s\n", strerror(errno));
+		return EXIT_FAILURE;
+	} else {
+		printf("chip open\n");
+	}
+
+	list_lines(chip);
+
+#if 0
+	info = gpiod_chip_get_info(chip);
+	if (!info) {
+		fprintf(stderr, "failed to read info: %s\n", strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	printf("%s [%s] (%zu lines)\n", gpiod_chip_info_get_name(info),
+	       gpiod_chip_info_get_label(info),
+	       gpiod_chip_info_get_num_lines(info));
+
+	gpiod_chip_info_free(info);
+#endif
+	gpiod_chip_close(chip);
+
+	return EXIT_SUCCESS;
+}
