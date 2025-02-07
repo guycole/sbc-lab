@@ -1,0 +1,3 @@
+numpy==2.2.2
+pillow==11.1.0
+sense-hat==2.6.0
